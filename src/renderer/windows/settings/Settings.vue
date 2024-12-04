@@ -45,6 +45,7 @@ const alwaysShowVolumeSlider = ref<boolean>(appearance.alwaysShowVolumeSlider);
 const customCSSEnabled = ref<boolean>(appearance.customCSSEnabled);
 const customCSSPath = ref<string>(appearance.customCSSPath);
 const zoom = ref<number>(appearance.zoom);
+const darkTrayIcon = ref<boolean>(appearance.darkTrayIcon);
 
 const continueWhereYouLeftOff = ref<boolean>(playback.continueWhereYouLeftOff);
 const continueWhereYouLeftOffPaused = ref<boolean>(playback.continueWhereYouLeftOffPaused);
@@ -82,6 +83,7 @@ store.onDidAnyChange(async newState => {
   customCSSEnabled.value = newState.appearance.customCSSEnabled;
   customCSSPath.value = newState.appearance.customCSSPath;
   zoom.value = newState.appearance.zoom;
+  darkTrayIcon.value = newState.appearance.darkTrayIcon;
 
   continueWhereYouLeftOff.value = newState.playback.continueWhereYouLeftOff;
   continueWhereYouLeftOffPaused.value = newState.playback.continueWhereYouLeftOffPaused;
@@ -154,6 +156,7 @@ async function settingsChanged() {
   store.set("appearance.alwaysShowVolumeSlider", alwaysShowVolumeSlider.value);
   store.set("appearance.customCSSEnabled", customCSSEnabled.value);
   store.set("appearance.zoom", zoom.value);
+  store.set("appearance.darkTrayIcon", darkTrayIcon.value);
 
   store.set("playback.continueWhereYouLeftOff", continueWhereYouLeftOff.value);
   store.set("playback.continueWhereYouLeftOffPaused", continueWhereYouLeftOffPaused.value);
@@ -313,6 +316,7 @@ window.ytmd.handleUpdateDownloaded(() => {
             @clear="removeCustomCSSPath"
           />
           <YTMDSetting v-model="zoom" type="range" max="300" min="30" step="10" name="Zoom" @change="settingsChanged" />
+          <YTMDSetting v-model="darkTrayIcon" type="checkbox" name="Use dark tray icon?" @change="settingsChanged" />
         </div>
 
         <div v-if="currentTab === 3" class="playback-tab">

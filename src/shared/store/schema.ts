@@ -14,6 +14,7 @@ export type StoreSchema = {
     customCSSEnabled: boolean;
     customCSSPath: string | null;
     zoom: number;
+    darkTrayIcon: boolean;
   };
   playback: {
     continueWhereYouLeftOff: boolean;

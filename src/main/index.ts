@@ -172,7 +172,7 @@ const ytmViewIntegrationScripts: { [name: string]: { [name: string]: string } } 
 let mainWindow: BrowserWindow = null;
 let settingsWindow: BrowserWindow = null;
 let ytmView: BrowserView = null;
-let tray = null;
+let tray: Tray = null;
 let trayContextMenu = null;
 
 // These variables tend to be changed often so we store it in memory and write on close (less disk usage)
@@ -352,7 +352,8 @@ const store = new Conf<StoreSchema>({
       alwaysShowVolumeSlider: false,
       customCSSEnabled: false,
       customCSSPath: null,
-      zoom: 100
+      zoom: 100,
+      darkTrayIcon: true
     },
     playback: {
       continueWhereYouLeftOff: true,
@@ -461,6 +462,7 @@ store.onDidAnyChange(async (newState, oldState) => {
     customCss.disable();
     log.info("Integration disabled: Custom CSS");
   }
+  if (oldState.appearance.darkTrayIcon !== newState.appearance.darkTrayIcon) setTrayIcon();
 
   // Playback
   if (newState.playback.ratioVolume) {
@@ -662,6 +664,17 @@ function setupTaskbarFeatures() {
       mainWindow.setProgressBar(-1);
     }
   });
+}
+
+function getTrayIconPath() {
+  const useDarkIcon = store.get("appearance").darkTrayIcon;
+  const posixIconFile = useDarkIcon ? "trayTemplate_black.png" : "trayTemplate_white.png";
+  const iconsDir = process.env.NODE_ENV === "development" ? path.join(app.getAppPath(), "src/assets/icons") : process.resourcesPath;
+  return path.join(iconsDir, process.platform === "win32" ? "tray.ico" : posixIconFile);
+}
+
+function setTrayIcon() {
+  tray.setImage(getTrayIconPath());
 }
 
 // Shortcut registration
@@ -1770,12 +1783,7 @@ app.on("ready", async () => {
   registerShortcuts();
 
   // Create the tray
-  tray = new Tray(
-    path.join(
-      process.env.NODE_ENV === "development" ? path.join(app.getAppPath(), "src/assets/icons") : process.resourcesPath,
-      process.platform === "win32" ? "tray.ico" : "trayTemplate.png"
-    )
-  );
+  tray = new Tray(getTrayIconPath());
   trayContextMenu = Menu.buildFromTemplate([
     {
       label: "YouTube Music Desktop",
