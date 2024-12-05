@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import KeybindInput from "../../components/KeybindInput.vue";
 import YTMDSetting from "../../components/YTMDSetting.vue";
-import { StoreSchema } from "~shared/store/schema";
+import { StoreSchema, TrayIconStyle, trayIconStyles } from "~shared/store/schema";
 import { AuthToken } from "~shared/integrations/companion-server/types";
 import logo from "~assets/icons/ytmd.png";
 
@@ -45,7 +45,7 @@ const alwaysShowVolumeSlider = ref<boolean>(appearance.alwaysShowVolumeSlider);
 const customCSSEnabled = ref<boolean>(appearance.customCSSEnabled);
 const customCSSPath = ref<string>(appearance.customCSSPath);
 const zoom = ref<number>(appearance.zoom);
-const darkTrayIcon = ref<boolean>(appearance.darkTrayIcon);
+const trayIconStyle = ref<TrayIconStyle>(appearance.trayIconStyle);
 
 const continueWhereYouLeftOff = ref<boolean>(playback.continueWhereYouLeftOff);
 const continueWhereYouLeftOffPaused = ref<boolean>(playback.continueWhereYouLeftOffPaused);
@@ -83,7 +83,7 @@ store.onDidAnyChange(async newState => {
   customCSSEnabled.value = newState.appearance.customCSSEnabled;
   customCSSPath.value = newState.appearance.customCSSPath;
   zoom.value = newState.appearance.zoom;
-  darkTrayIcon.value = newState.appearance.darkTrayIcon;
+  trayIconStyle.value = newState.appearance.trayIconStyle;
 
   continueWhereYouLeftOff.value = newState.playback.continueWhereYouLeftOff;
   continueWhereYouLeftOffPaused.value = newState.playback.continueWhereYouLeftOffPaused;
@@ -146,6 +146,10 @@ async function memorySettingsChanged() {
   memoryStore.set("companionServerAuthWindowEnabled", companionServerAuthWindowEnabled.value);
 }
 
+async function trayIconStyleChanged(event: Event) {
+  store.set("appearance.trayIconStyle", (event.target as HTMLInputElement).value);
+}
+
 async function settingsChanged() {
   store.set("general.hideToTrayOnClose", hideToTrayOnClose.value);
   store.set("general.showNotificationOnSongChange", showNotificationOnSongChange.value);
@@ -156,7 +160,6 @@ async function settingsChanged() {
   store.set("appearance.alwaysShowVolumeSlider", alwaysShowVolumeSlider.value);
   store.set("appearance.customCSSEnabled", customCSSEnabled.value);
   store.set("appearance.zoom", zoom.value);
-  store.set("appearance.darkTrayIcon", darkTrayIcon.value);
 
   store.set("playback.continueWhereYouLeftOff", continueWhereYouLeftOff.value);
   store.set("playback.continueWhereYouLeftOffPaused", continueWhereYouLeftOffPaused.value);
@@ -316,7 +319,11 @@ window.ytmd.handleUpdateDownloaded(() => {
             @clear="removeCustomCSSPath"
           />
           <YTMDSetting v-model="zoom" type="range" max="300" min="30" step="10" name="Zoom" @change="settingsChanged" />
-          <YTMDSetting v-model="darkTrayIcon" type="checkbox" name="Use dark tray icon?" @change="settingsChanged" />
+          <YTMDSetting type="custom" name="Tray icon style">
+            <select @change="trayIconStyleChanged">
+              <option v-for="t in trayIconStyles" :key="t" :selected="trayIconStyle === t">{{ t }}</option>
+            </select>
+          </YTMDSetting>
         </div>
 
         <div v-if="currentTab === 3" class="playback-tab">

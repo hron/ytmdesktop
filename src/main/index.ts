@@ -11,6 +11,7 @@ import {
   Menu,
   MenuItemConstructorOptions,
   nativeImage,
+  nativeTheme,
   safeStorage,
   screen,
   session,
@@ -353,7 +354,7 @@ const store = new Conf<StoreSchema>({
       customCSSEnabled: false,
       customCSSPath: null,
       zoom: 100,
-      darkTrayIcon: true
+      trayIconStyle: "auto"
     },
     playback: {
       continueWhereYouLeftOff: true,
@@ -416,6 +417,11 @@ const store = new Conf<StoreSchema>({
       if (!store.has("lastfm.scrobblePercent")) {
         store.set("lastfm.scrobblePercent", 50);
       }
+    },
+    ">=2.0.7": store => {
+      if (!store.has("appearance.trayIconStyle")) {
+        store.set("appearance.trayIconStyle", "auto");
+      }
     }
   }
 });
@@ -462,7 +468,7 @@ store.onDidAnyChange(async (newState, oldState) => {
     customCss.disable();
     log.info("Integration disabled: Custom CSS");
   }
-  if (oldState.appearance.darkTrayIcon !== newState.appearance.darkTrayIcon) setTrayIcon();
+  if (oldState.appearance.trayIconStyle !== newState.appearance.trayIconStyle) setTrayIcon();
 
   // Playback
   if (newState.playback.ratioVolume) {
@@ -666,11 +672,18 @@ function setupTaskbarFeatures() {
   });
 }
 
+type TrayIconColor = "black" | "white";
+
+function trayIconFileName(color: TrayIconColor) {
+  const format = process.platform === "win32" ? "ico" : "png";
+  return `tray_${color}.${format}`;
+}
+
 function getTrayIconPath() {
-  const useDarkIcon = store.get("appearance").darkTrayIcon;
-  const posixIconFile = useDarkIcon ? "trayTemplate_black.png" : "trayTemplate_white.png";
+  const style = store.get("appearance").trayIconStyle;
+  const color: TrayIconColor = style === "auto" ? (nativeTheme.shouldUseDarkColors ? "white" : "black") : style;
   const iconsDir = process.env.NODE_ENV === "development" ? path.join(app.getAppPath(), "src/assets/icons") : process.resourcesPath;
-  return path.join(iconsDir, process.platform === "win32" ? "tray.ico" : posixIconFile);
+  return path.join(iconsDir, trayIconFileName(color));
 }
 
 function setTrayIcon() {
@@ -1932,6 +1945,8 @@ app.on("ready", async () => {
     lastFMScrobbler.enable();
     log.info("Integration enabled: Last.fm");
   }
+
+  nativeTheme.on("updated", setTrayIcon);
 });
 
 app.on("before-quit", () => {

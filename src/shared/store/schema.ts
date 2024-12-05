@@ -1,3 +1,6 @@
+export const trayIconStyles = ["auto", "white", "black"] as const;
+export type TrayIconStyle = (typeof trayIconStyles)[number];
+
 export type StoreSchema = {
   metadata: {
     version: 1;
@@ -14,7 +17,7 @@ export type StoreSchema = {
     customCSSEnabled: boolean;
     customCSSPath: string | null;
     zoom: number;
-    darkTrayIcon: boolean;
+    trayIconStyle: TrayIconStyle;
   };
   playback: {
     continueWhereYouLeftOff: boolean;
