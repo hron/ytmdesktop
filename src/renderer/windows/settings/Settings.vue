@@ -14,6 +14,7 @@ const ytmdCommitHash = YTMD_GIT_COMMIT_HASH.substring(0, 7);
 const ytmdBranch = YTMD_GIT_BRANCH;
 
 const isDarwin = window.ytmd.isDarwin;
+const isLinux = window.ytmd.isLinux;
 
 const currentTab = ref(1);
 const requiresRestart = ref(false);
@@ -319,7 +320,7 @@ window.ytmd.handleUpdateDownloaded(() => {
             @clear="removeCustomCSSPath"
           />
           <YTMDSetting v-model="zoom" type="range" max="300" min="30" step="10" name="Zoom" @change="settingsChanged" />
-          <YTMDSetting type="custom" name="Tray icon style">
+          <YTMDSetting v-if="isLinux" type="custom" name="Tray icon style">
             <select @change="trayIconStyleChanged">
               <option v-for="t in trayIconStyles" :key="t" :selected="trayIconStyle === t">{{ t }}</option>
             </select>
