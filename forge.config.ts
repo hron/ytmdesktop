@@ -21,8 +21,7 @@ const config: ForgeConfig = {
     executableName: "youtube-music-desktop-app",
     icon: "./src/assets/icons/ytmd",
     extraResource: [
-      "./src/assets/icons/tray_white.ico",
-      "./src/assets/icons/tray_black.ico",
+      "./src/assets/icons/tray.ico",
       "./src/assets/icons/tray_white@2x.png",
       "./src/assets/icons/tray_black@2x.png",
       "./src/assets/icons/ytmd.png",
