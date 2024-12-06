@@ -675,8 +675,14 @@ function setupTaskbarFeatures() {
 type TrayIconColor = "black" | "white";
 
 function trayIconFileName(color: TrayIconColor) {
-  if (process.platform === "win32") return "tray.ico";
-  return `ytmd_${color}.png`;
+  switch (process.platform) {
+    case "win32":
+      return "tray.ico";
+    case "darwin":
+      return "trayTemplate.png";
+    default:
+      return `ytmd_${color}.png`;
+  }
 }
 
 function getTrayIconPath() {

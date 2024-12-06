@@ -22,8 +22,8 @@ const config: ForgeConfig = {
     icon: "./src/assets/icons/ytmd",
     extraResource: [
       "./src/assets/icons/tray.ico",
-      "./src/assets/icons/tray_white@2x.png",
-      "./src/assets/icons/tray_black@2x.png",
+      "./src/assets/icons/trayTemplate.png",
+      "./src/assets/icons/trayTemplate@2x.png",
       "./src/assets/icons/ytmd.png",
       "./src/assets/icons/ytmd_white.png",
       "./src/assets/icons/ytmd_black.png",
