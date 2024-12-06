@@ -676,7 +676,7 @@ type TrayIconColor = "black" | "white";
 
 function trayIconFileName(color: TrayIconColor) {
   const format = process.platform === "win32" ? "ico" : "png";
-  return `tray_${color}.${format}`;
+  return `ytmd_${color}.${format}`;
 }
 
 function getTrayIconPath() {

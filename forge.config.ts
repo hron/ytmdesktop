@@ -23,11 +23,11 @@ const config: ForgeConfig = {
     extraResource: [
       "./src/assets/icons/tray_white.ico",
       "./src/assets/icons/tray_black.ico",
-      "./src/assets/icons/tray_white.png",
-      "./src/assets/icons/tray_black.png",
       "./src/assets/icons/tray_white@2x.png",
       "./src/assets/icons/tray_black@2x.png",
       "./src/assets/icons/ytmd.png",
+      "./src/assets/icons/ytmd_white.png",
+      "./src/assets/icons/ytmd_black.png",
 
       "./src/assets/icons/controls/pause-button.png",
       "./src/assets/icons/controls/play-button.png",
