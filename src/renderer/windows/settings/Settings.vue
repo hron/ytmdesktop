@@ -869,4 +869,19 @@ button {
   margin-left: 4px;
   color: #f44336;
 }
+
+select {
+  font-size: 18px;
+  padding: 8px;
+  border: none;
+  background-color: #212121;
+  color: white;
+  border-radius: 4px;
+  outline: none;
+}
+
+select option {
+  background-color: #212121;
+  color: white;
+}
 </style>
