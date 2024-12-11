@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import KeybindInput from "../../components/KeybindInput.vue";
 import YTMDSetting from "../../components/YTMDSetting.vue";
-import { StoreSchema, TrayIconStyle, trayIconStyles } from "~shared/store/schema";
+import { StoreSchema, trayIconStyles } from "~shared/store/schema";
 import { AuthToken } from "~shared/integrations/companion-server/types";
 import logo from "~assets/icons/ytmd.png";
 
@@ -46,7 +46,7 @@ const alwaysShowVolumeSlider = ref<boolean>(appearance.alwaysShowVolumeSlider);
 const customCSSEnabled = ref<boolean>(appearance.customCSSEnabled);
 const customCSSPath = ref<string>(appearance.customCSSPath);
 const zoom = ref<number>(appearance.zoom);
-const trayIconStyle = ref<TrayIconStyle>(appearance.trayIconStyle);
+const trayIconStyle = ref<number>(trayIconStyles.indexOf(appearance.trayIconStyle));
 
 const continueWhereYouLeftOff = ref<boolean>(playback.continueWhereYouLeftOff);
 const continueWhereYouLeftOffPaused = ref<boolean>(playback.continueWhereYouLeftOffPaused);
@@ -84,7 +84,7 @@ store.onDidAnyChange(async newState => {
   customCSSEnabled.value = newState.appearance.customCSSEnabled;
   customCSSPath.value = newState.appearance.customCSSPath;
   zoom.value = newState.appearance.zoom;
-  trayIconStyle.value = newState.appearance.trayIconStyle;
+  trayIconStyle.value = trayIconStyles.indexOf(newState.appearance.trayIconStyle);
 
   continueWhereYouLeftOff.value = newState.playback.continueWhereYouLeftOff;
   continueWhereYouLeftOffPaused.value = newState.playback.continueWhereYouLeftOffPaused;
@@ -147,10 +147,6 @@ async function memorySettingsChanged() {
   memoryStore.set("companionServerAuthWindowEnabled", companionServerAuthWindowEnabled.value);
 }
 
-async function trayIconStyleChanged(event: Event) {
-  store.set("appearance.trayIconStyle", (event.target as HTMLInputElement).value);
-}
-
 async function settingsChanged() {
   store.set("general.hideToTrayOnClose", hideToTrayOnClose.value);
   store.set("general.showNotificationOnSongChange", showNotificationOnSongChange.value);
@@ -161,6 +157,7 @@ async function settingsChanged() {
   store.set("appearance.alwaysShowVolumeSlider", alwaysShowVolumeSlider.value);
   store.set("appearance.customCSSEnabled", customCSSEnabled.value);
   store.set("appearance.zoom", zoom.value);
+  store.set("appearance.trayIconStyle", trayIconStyles[trayIconStyle.value]);
 
   store.set("playback.continueWhereYouLeftOff", continueWhereYouLeftOff.value);
   store.set("playback.continueWhereYouLeftOffPaused", continueWhereYouLeftOffPaused.value);
@@ -182,6 +179,15 @@ async function settingsChanged() {
   store.set("shortcuts.volumeUp", shortcutVolumeUp.value);
   store.set("shortcuts.volumeDown", shortcutVolumeDown.value);
 }
+
+const toOptionsMap = <T,>(variants: readonly T[]) =>
+  variants.reduce(
+    (acc, value, index) => {
+      acc[index] = value;
+      return acc;
+    },
+    {} as Record<number, T>
+  );
 
 async function settingChangedRequiresRestart() {
   requiresRestart.value = true;
@@ -320,11 +326,14 @@ window.ytmd.handleUpdateDownloaded(() => {
             @clear="removeCustomCSSPath"
           />
           <YTMDSetting v-model="zoom" type="range" max="300" min="30" step="10" name="Zoom" @change="settingsChanged" />
-          <YTMDSetting v-if="isLinux" type="custom" name="Tray icon style">
-            <select @change="trayIconStyleChanged">
-              <option v-for="t in trayIconStyles" :key="t" :selected="trayIconStyle === t">{{ t }}</option>
-            </select>
-          </YTMDSetting>
+          <YTMDSetting
+            v-if="isLinux"
+            v-model="trayIconStyle"
+            :options-map="toOptionsMap(trayIconStyles)"
+            type="select"
+            name="Tray icon style"
+            @change="settingsChanged"
+          />
         </div>
 
         <div v-if="currentTab === 3" class="playback-tab">
@@ -868,20 +877,5 @@ button {
 .shortcuts-tab .shortcut-title .register-error {
   margin-left: 4px;
   color: #f44336;
-}
-
-select {
-  font-size: 18px;
-  padding: 8px;
-  border: none;
-  background-color: #212121;
-  color: white;
-  border-radius: 4px;
-  outline: none;
-}
-
-select option {
-  background-color: #212121;
-  color: white;
 }
 </style>
