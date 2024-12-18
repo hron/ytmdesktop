@@ -1,5 +1,8 @@
-export const trayIconStyles = ["auto", "white", "black"] as const;
-export type TrayIconStyle = (typeof trayIconStyles)[number];
+export enum TrayIconStyle {
+  Auto = 0,
+  White = 1,
+  Black = 2
+}
 
 export type StoreSchema = {
   metadata: {

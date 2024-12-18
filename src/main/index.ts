@@ -26,7 +26,7 @@ import electronSquirrelStartup from "electron-squirrel-startup";
 
 import MemoryStore from "./memory-store";
 import playerStateStore, { PlayerState, VideoState } from "./player-state-store";
-import { MemoryStoreSchema, StoreSchema } from "~shared/store/schema";
+import { MemoryStoreSchema, StoreSchema, TrayIconStyle } from "../shared/store/schema";
 
 import CompanionServer from "./integrations/companion-server";
 import CustomCSS from "./integrations/custom-css";
@@ -354,7 +354,7 @@ const store = new Conf<StoreSchema>({
       customCSSEnabled: false,
       customCSSPath: null,
       zoom: 100,
-      trayIconStyle: "auto"
+      trayIconStyle: TrayIconStyle.Auto
     },
     playback: {
       continueWhereYouLeftOff: true,
@@ -420,7 +420,7 @@ const store = new Conf<StoreSchema>({
     },
     ">=2.0.7": store => {
       if (!store.has("appearance.trayIconStyle")) {
-        store.set("appearance.trayIconStyle", "auto");
+        store.set("appearance.trayIconStyle", 0);
       }
     }
   }
@@ -672,24 +672,25 @@ function setupTaskbarFeatures() {
   });
 }
 
-type TrayIconColor = "black" | "white";
+function trayIconFileName(style: TrayIconStyle) {
+  if (process.platform === "win32") return "tray.ico";
+  if (process.platform === "darwin") return "trayTemplate.png";
 
-function trayIconFileName(color: TrayIconColor) {
-  switch (process.platform) {
-    case "win32":
-      return "tray.ico";
-    case "darwin":
-      return "trayTemplate.png";
-    default:
-      return `ytmd_${color}.png`;
+  let color: "white" | "black";
+  if (style === TrayIconStyle.White) {
+    color = "white";
+  } else if (style === TrayIconStyle.Black) {
+    color = "black";
+  } else {
+    color = nativeTheme.shouldUseDarkColors ? "white" : "black";
   }
+  return `ytmd_${color}.png`;
 }
 
 function getTrayIconPath() {
   const style = store.get("appearance").trayIconStyle;
-  const color: TrayIconColor = style === "auto" ? (nativeTheme.shouldUseDarkColors ? "white" : "black") : style;
   const iconsDir = process.env.NODE_ENV === "development" ? path.join(app.getAppPath(), "src/assets/icons") : process.resourcesPath;
-  return path.join(iconsDir, trayIconFileName(color));
+  return path.join(iconsDir, trayIconFileName(style));
 }
 
 function setTrayIcon() {

@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import KeybindInput from "../../components/KeybindInput.vue";
 import YTMDSetting from "../../components/YTMDSetting.vue";
-import { StoreSchema, trayIconStyles } from "~shared/store/schema";
+import { StoreSchema, TrayIconStyle } from "~shared/store/schema";
 import { AuthToken } from "~shared/integrations/companion-server/types";
 import logo from "~assets/icons/ytmd.png";
 
@@ -46,7 +46,7 @@ const alwaysShowVolumeSlider = ref<boolean>(appearance.alwaysShowVolumeSlider);
 const customCSSEnabled = ref<boolean>(appearance.customCSSEnabled);
 const customCSSPath = ref<string>(appearance.customCSSPath);
 const zoom = ref<number>(appearance.zoom);
-const trayIconStyle = ref<number>(trayIconStyles.indexOf(appearance.trayIconStyle));
+const trayIconStyle = ref<number>(appearance.trayIconStyle);
 
 const continueWhereYouLeftOff = ref<boolean>(playback.continueWhereYouLeftOff);
 const continueWhereYouLeftOffPaused = ref<boolean>(playback.continueWhereYouLeftOffPaused);
@@ -84,7 +84,7 @@ store.onDidAnyChange(async newState => {
   customCSSEnabled.value = newState.appearance.customCSSEnabled;
   customCSSPath.value = newState.appearance.customCSSPath;
   zoom.value = newState.appearance.zoom;
-  trayIconStyle.value = trayIconStyles.indexOf(newState.appearance.trayIconStyle);
+  trayIconStyle.value = newState.appearance.trayIconStyle;
 
   continueWhereYouLeftOff.value = newState.playback.continueWhereYouLeftOff;
   continueWhereYouLeftOffPaused.value = newState.playback.continueWhereYouLeftOffPaused;
@@ -157,7 +157,7 @@ async function settingsChanged() {
   store.set("appearance.alwaysShowVolumeSlider", alwaysShowVolumeSlider.value);
   store.set("appearance.customCSSEnabled", customCSSEnabled.value);
   store.set("appearance.zoom", zoom.value);
-  store.set("appearance.trayIconStyle", trayIconStyles[trayIconStyle.value]);
+  store.set("appearance.trayIconStyle", trayIconStyle.value);
 
   store.set("playback.continueWhereYouLeftOff", continueWhereYouLeftOff.value);
   store.set("playback.continueWhereYouLeftOffPaused", continueWhereYouLeftOffPaused.value);
@@ -180,15 +180,6 @@ async function settingsChanged() {
   store.set("shortcuts.volumeDown", shortcutVolumeDown.value);
 }
 
-const toOptionsMap = <T,>(variants: readonly T[]) =>
-  variants.reduce(
-    (acc, value, index) => {
-      acc[index] = value;
-      return acc;
-    },
-    {} as Record<number, T>
-  );
-
 async function settingChangedRequiresRestart() {
   requiresRestart.value = true;
   settingsChanged();
@@ -196,8 +187,6 @@ async function settingChangedRequiresRestart() {
 
 async function settingChangedFile(event: Event) {
   const target = event.target as HTMLInputElement;
-
-  console.log(event);
 
   const setting = target.dataset.setting;
   if (!setting) {
@@ -329,7 +318,7 @@ window.ytmd.handleUpdateDownloaded(() => {
           <YTMDSetting
             v-if="isLinux"
             v-model="trayIconStyle"
-            :options-map="toOptionsMap(trayIconStyles)"
+            :options-map="{ [TrayIconStyle.Auto]: 'Auto', [TrayIconStyle.White]: 'White', [TrayIconStyle.Black]: 'Black' }"
             type="select"
             name="Tray icon style"
             @change="settingsChanged"
